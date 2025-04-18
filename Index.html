@@ -14,8 +14,14 @@
       padding: 20px;
     }
     h1 {
-      margin-bottom: 20px;
+      margin-bottom: 10px;
       color: #2e7d32;
+    }
+    #daily-message {
+      font-style: italic;
+      font-size: 17px;
+      color: #555;
+      margin-bottom: 20px;
     }
     .month-buttons button {
       padding: 10px 16px;
@@ -64,15 +70,20 @@
     .icon-button:hover {
       transform: scale(1.2);
     }
+    .totals {
+      margin-top: 30px;
+      font-size: 18px;
+    }
   </style>
 </head>
 <body>
   <h1>Prayer Tracker – Mai & Moses</h1>
+  <div id="daily-message"></div>
   <div class="month-buttons" id="month-buttons"></div>
   <div id="months-container"></div>
+  <div class="totals" id="summary"></div>
 
   <script>
-    // Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyD89bzLpDJ90uLsZGzZaIb2dz2WG14NXQg",
       authDomain: "prayer-tracker-95460.firebaseapp.com",
@@ -92,6 +103,25 @@
 
     const monthButtons = document.getElementById('month-buttons');
     const container = document.getElementById('months-container');
+    const summary = document.getElementById('summary');
+    const messageBox = document.getElementById('daily-message');
+
+    const counts = { 'Mai': 0, 'Moses': 0 };
+
+    const dailyMessages = [
+      "May your heart find peace in every prayer today.",
+      "Even one step forward counts. Allah sees your effort.",
+      "Together in prayer, together in love.",
+      "Your prayers are a light in your day.",
+      "Small consistent acts are beloved to Allah.",
+      "You are never alone on this path.",
+      "Allah loves those who strive."
+    ];
+
+    const today = new Date();
+    const index = today.getDate() % dailyMessages.length;
+    messageBox.textContent = dailyMessages[index];
+
     const allWeeks = [];
     let current = new Date(startDate);
 
@@ -105,6 +135,10 @@
       allWeeks.push(week);
     }
 
+    const updateSummary = () => {
+      summary.textContent = `Mai: ${counts['Mai']} prayers ❤️ | Moses: ${counts['Moses']} prayers ❤️`;
+    };
+
     allWeeks.forEach((week, weekIndex) => {
       const section = document.createElement('div');
       section.className = 'month-section';
@@ -113,7 +147,6 @@
       const table = document.createElement('table');
       const thead = document.createElement('thead');
       const dateHeaders = week.map(date => `${date.toLocaleDateString('en-GB', { weekday: 'short' })} (${date.getDate()} ${date.toLocaleString('default', { month: 'short' })})`);
-
       thead.innerHTML = `<tr><th>Prayer</th><th>Name</th>${dateHeaders.map(d => `<th>${d}</th>`).join('')}</tr>`;
       table.appendChild(thead);
 
@@ -145,12 +178,16 @@
             db.ref('tracker/' + id).once('value').then(snapshot => {
               const value = snapshot.val();
               icon.textContent = value === true ? '❤️' : '😔';
+              if (value === true) counts[user]++;
+              updateSummary();
             });
 
             icon.addEventListener('click', () => {
               const newValue = icon.textContent === '❤️' ? false : true;
               db.ref('tracker/' + id).set(newValue);
               icon.textContent = newValue ? '❤️' : '😔';
+              counts[user] += newValue ? 1 : -1;
+              updateSummary();
             });
 
             cell.appendChild(icon);
