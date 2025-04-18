@@ -115,11 +115,14 @@
       "Your prayers are a light in your day.",
       "Small consistent acts are beloved to Allah.",
       "You are never alone on this path.",
-      "Allah loves those who strive."
+      "Allah loves those who strive.",
+      "Consistency in prayer is a gift you give to your soul.",
+      "One prayer at a time, you're building strength.",
+      "Allah listens, even when your heart whispers."
     ];
 
     const today = new Date();
-    const index = today.getDate() % dailyMessages.length;
+    const index = Math.floor(Math.random() * dailyMessages.length);
     messageBox.textContent = dailyMessages[index];
 
     const allWeeks = [];
@@ -175,19 +178,25 @@
             icon.className = 'icon-button';
             icon.textContent = '😔';
 
+            let currentState = false;
+
             db.ref('tracker/' + id).once('value').then(snapshot => {
               const value = snapshot.val();
-              icon.textContent = value === true ? '❤️' : '😔';
-              if (value === true) counts[user]++;
+              currentState = value === true;
+              icon.textContent = currentState ? '❤️' : '😔';
+              if (currentState) counts[user]++;
               updateSummary();
             });
 
             icon.addEventListener('click', () => {
-              const newValue = icon.textContent === '❤️' ? false : true;
+              const newValue = !currentState;
               db.ref('tracker/' + id).set(newValue);
               icon.textContent = newValue ? '❤️' : '😔';
-              counts[user] += newValue ? 1 : -1;
-              updateSummary();
+              if (newValue !== currentState) {
+                counts[user] += newValue ? 1 : -1;
+                currentState = newValue;
+                updateSummary();
+              }
             });
 
             cell.appendChild(icon);
