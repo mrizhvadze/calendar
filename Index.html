@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Prayer Tracker - Mai & Moses</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f0f4f8;
+      text-align: center;
+      padding: 20px;
+      animation: fadeInBody 1.2s ease;
+    }
+
+    @keyframes fadeInBody {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      color: #2e7d32;
+      animation: fadeInHeader 1.2s ease;
+    }
+
+    @keyframes fadeInHeader {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .month-buttons {
+      margin-bottom: 20px;
+    }
+
+    .month-buttons button {
+      padding: 8px 14px;
+      margin: 4px;
+      border: none;
+      background-color: #66bb6a;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .month-buttons button:hover {
+      background-color: #388e3c;
+    }
+
+    .month-section {
+      display: none;
+      animation: fadeInMonth 0.8s ease-in-out;
+    }
+
+    .month-section.active {
+      display: block;
+    }
+
+    @keyframes fadeInMonth {
+      from { opacity: 0; transform: scale(0.98); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    table {
+      width: 100%;
+      max-width: 950px;
+      margin: auto;
+      border-collapse: collapse;
+      background: #ffffff;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+    }
+
+    th {
+      background-color: #388e3c;
+      color: white;
+    }
+
+    .name {
+      font-weight: bold;
+      background-color: #e8f5e9;
+    }
+
+    tr:hover {
+      background-color: #f1f8e9;
+      transition: background-color 0.3s ease;
+    }
+
+    td input[type="checkbox"] {
+      transform: scale(1.2);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    td input[type="checkbox"]:checked {
+      transform: scale(1.4);
+      box-shadow: 0 0 10px #81c784;
+    }
+  </style>
+</head>
+<body>
+  <h1>Prayer Tracker – Mai & Moses</h1>
+
+  <div class="month-buttons" id="month-buttons">
+    <!-- Buttons will be added here -->
+  </div>
+
+  <div id="months-container">
+    <!-- Tables will be added here -->
+  </div>
+
+  <script>
+    const prayers = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+    const users = ['Mai', 'Moses'];
+    const months = ['April', 'May', 'June', 'July', 'August', 'September', 'October'];
+
+    const monthButtons = document.getElementById('month-buttons');
+    const container = document.getElementById('months-container');
+
+    months.forEach((month, monthIndex) => {
+      // Create month section
+      const section = document.createElement('div');
+      section.className = 'month-section';
+      section.id = `month-${monthIndex}`;
+
+      // Create table
+      const table = document.createElement('table');
+
+      const thead = document.createElement('thead');
+      thead.innerHTML = `
+        <tr>
+          <th>Prayer</th>
+          <th>Name</th>
+          <th>Mon</th>
+          <th>Tue</th>
+          <th>Wed</th>
+          <th>Thu</th>
+          <th>Fri</th>
+          <th>Sat</th>
+          <th>Sun</th>
+        </tr>`;
+      table.appendChild(thead);
+
+      const tbody = document.createElement('tbody');
+
+      prayers.forEach(prayer => {
+        users.forEach(user => {
+          const row = document.createElement('tr');
+
+          if (user === 'Mai') {
+            const prayerCell = document.createElement('td');
+            prayerCell.textContent = prayer;
+            prayerCell.rowSpan = 2;
+            row.appendChild(prayerCell);
+          }
+
+          const nameCell = document.createElement('td');
+          nameCell.textContent = user;
+          nameCell.className = 'name';
+          row.appendChild(nameCell);
+
+          for (let i = 0; i < 7; i++) {
+            const cell = document.createElement('td');
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+
+            const id = `${month}_${prayer}_${user}_${i}`;
+            checkbox.id = id;
+            checkbox.checked = localStorage.getItem(id) === 'true';
+
+            checkbox.addEventListener('change', () => {
+              localStorage.setItem(id, checkbox.checked);
+            });
+
+            cell.appendChild(checkbox);
+            row.appendChild(cell);
+          }
+
+          tbody.appendChild(row);
+        });
+      });
+
+      table.appendChild(tbody);
+      section.appendChild(table);
+      container.appendChild(section);
+
+      // Create button
+      const button = document.createElement('button');
+      button.textContent = month;
+      button.addEventListener('click', () => {
+        document.querySelectorAll('.month-section').forEach(s => s.classList.remove('active'));
+        section.classList.add('active');
+      });
+
+      monthButtons.appendChild(button);
+    });
+
+    // Show first month by default
+    document.getElementById('month-0').classList.add('active');
+  </script>
+</body>
+</html>
