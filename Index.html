@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Prayer Tracker - Mai & Moses</title>
+  <title>Prayer Tracker – Mai & Moses</title>
   <style>
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Segoe UI', sans-serif;
       background-color: #f0f4f8;
       text-align: center;
       padding: 20px;
-      animation: fadeInBody 1.2s ease;
+      animation: fadeInBody 1s ease;
     }
 
     @keyframes fadeInBody {
@@ -20,12 +20,6 @@
     h1 {
       margin-bottom: 20px;
       color: #2e7d32;
-      animation: fadeInHeader 1.2s ease;
-    }
-
-    @keyframes fadeInHeader {
-      from { opacity: 0; transform: scale(0.95); }
-      to { opacity: 1; transform: scale(1); }
     }
 
     .month-buttons {
@@ -33,14 +27,15 @@
     }
 
     .month-buttons button {
-      padding: 8px 14px;
-      margin: 4px;
+      padding: 10px 16px;
+      margin: 5px;
       border: none;
       background-color: #66bb6a;
       color: white;
       border-radius: 6px;
       cursor: pointer;
-      transition: background-color 0.3s ease;
+      font-weight: bold;
+      transition: background-color 0.3s;
     }
 
     .month-buttons button:hover {
@@ -57,7 +52,7 @@
     }
 
     @keyframes fadeInMonth {
-      from { opacity: 0; transform: scale(0.98); }
+      from { opacity: 0; transform: scale(0.97); }
       to { opacity: 1; transform: scale(1); }
     }
 
@@ -66,7 +61,7 @@
       max-width: 950px;
       margin: auto;
       border-collapse: collapse;
-      background: #ffffff;
+      background: #fff;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       border-radius: 8px;
       overflow: hidden;
@@ -90,7 +85,7 @@
 
     tr:hover {
       background-color: #f1f8e9;
-      transition: background-color 0.3s ease;
+      transition: background-color 0.3s;
     }
 
     td input[type="checkbox"] {
@@ -108,15 +103,28 @@
 <body>
   <h1>Prayer Tracker – Mai & Moses</h1>
 
-  <div class="month-buttons" id="month-buttons">
-    <!-- Buttons will be added here -->
-  </div>
+  <div class="month-buttons" id="month-buttons"></div>
+  <div id="months-container"></div>
 
-  <div id="months-container">
-    <!-- Tables will be added here -->
-  </div>
-
+  <!-- 🔗 Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js"></script>
   <script>
+    // 🚨 Replace with your actual Firebase project config below
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      databaseURL: "https://YOUR_PROJECT.firebaseio.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    // 🔌 Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
     const prayers = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
     const users = ['Mai', 'Moses'];
     const months = ['April', 'May', 'June', 'July', 'August', 'September', 'October'];
@@ -125,14 +133,11 @@
     const container = document.getElementById('months-container');
 
     months.forEach((month, monthIndex) => {
-      // Create month section
       const section = document.createElement('div');
       section.className = 'month-section';
       section.id = `month-${monthIndex}`;
 
-      // Create table
       const table = document.createElement('table');
-
       const thead = document.createElement('thead');
       thead.innerHTML = `
         <tr>
@@ -170,13 +175,16 @@
             const cell = document.createElement('td');
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
+            const id = `${month}/${prayer}/${user}/day${i}`;
 
-            const id = `${month}_${prayer}_${user}_${i}`;
-            checkbox.id = id;
-            checkbox.checked = localStorage.getItem(id) === 'true';
+            // Load saved checkbox value from Firebase
+            db.ref(id).once('value').then(snapshot => {
+              checkbox.checked = snapshot.val() === true;
+            });
 
+            // Save checkbox change to Firebase
             checkbox.addEventListener('change', () => {
-              localStorage.setItem(id, checkbox.checked);
+              db.ref(id).set(checkbox.checked);
             });
 
             cell.appendChild(checkbox);
@@ -191,7 +199,6 @@
       section.appendChild(table);
       container.appendChild(section);
 
-      // Create button
       const button = document.createElement('button');
       button.textContent = month;
       button.addEventListener('click', () => {
@@ -207,3 +214,4 @@
   </script>
 </body>
 </html>
+
