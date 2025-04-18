@@ -90,7 +90,11 @@
     const users = ['Mai', 'Moses'];
     const months = ['April', 'May'];
 
-    // Example saved data to display checked boxes
+    const monthStartDates = {
+      'April': new Date(2024, 3, 15),  // 15 April 2024
+      'May': new Date(2024, 4, 1)     // 1 May 2024
+    };
+
     const savedData = {
       'April': {
         'Fajr': {
@@ -110,6 +114,10 @@
       }
     };
 
+    function getFormattedDate(date) {
+      return `${date.getDate()} ${date.toLocaleString('default', { month: 'short' })}`;
+    }
+
     const monthButtons = document.getElementById('month-buttons');
     const container = document.getElementById('months-container');
 
@@ -120,20 +128,23 @@
 
       const table = document.createElement('table');
       const thead = document.createElement('thead');
+
+      let startDate = new Date(monthStartDates[month]);
+      let dateHeaders = [];
+      for (let i = 0; i < 7; i++) {
+        const current = new Date(startDate);
+        current.setDate(startDate.getDate() + i);
+        dateHeaders.push(`${current.toLocaleDateString('en-GB', { weekday: 'short' })} (${getFormattedDate(current)})`);
+      }
+
       thead.innerHTML = `
         <tr>
           <th>Prayer</th>
           <th>Name</th>
-          <th>Mon</th>
-          <th>Tue</th>
-          <th>Wed</th>
-          <th>Thu</th>
-          <th>Fri</th>
-          <th>Sat</th>
-          <th>Sun</th>
+          ${dateHeaders.map(d => `<th>${d}</th>`).join('')}
         </tr>`;
-      table.appendChild(thead);
 
+      table.appendChild(thead);
       const tbody = document.createElement('tbody');
 
       prayers.forEach(prayer => {
@@ -182,7 +193,6 @@
       monthButtons.appendChild(button);
     });
 
-    // Show first month by default
     document.getElementById('month-0').classList.add('active');
   </script>
 </body>
