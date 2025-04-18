@@ -92,8 +92,6 @@
     const startDate = new Date(2024, 3, 15); // April 15, 2024
     const endDate = new Date(2024, 8, 15); // September 15, 2024
 
-    const savedData = {}; // Example: Fill this dynamically or manually as needed
-
     const monthButtons = document.getElementById('month-buttons');
     const container = document.getElementById('months-container');
 
@@ -150,7 +148,14 @@
             const cell = document.createElement('td');
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
-            checkbox.checked = false; // Pre-filled state optional
+
+            const id = `${week[i].toISOString().split('T')[0]}_${prayer}_${user}`;
+            checkbox.checked = localStorage.getItem(id) === 'true';
+
+            checkbox.addEventListener('change', () => {
+              localStorage.setItem(id, checkbox.checked);
+            });
+
             cell.appendChild(checkbox);
             row.appendChild(cell);
           }
