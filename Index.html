@@ -88,54 +88,37 @@
   <script>
     const prayers = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
     const users = ['Mai', 'Moses'];
-    const months = ['April', 'May'];
 
-    const monthStartDates = {
-      'April': new Date(2024, 3, 15),  // 15 April 2024
-      'May': new Date(2024, 4, 1)     // 1 May 2024
-    };
+    const startDate = new Date(2024, 3, 15); // April 15, 2024
+    const endDate = new Date(2024, 8, 15); // September 15, 2024
 
-    const savedData = {
-      'April': {
-        'Fajr': {
-          'Mai': [true, false, true, false, false, false, true],
-          'Moses': [false, true, false, false, false, true, false]
-        },
-        'Isha': {
-          'Mai': [false, false, false, false, false, false, true],
-          'Moses': [false, false, true, true, false, false, false]
-        }
-      },
-      'May': {
-        'Dhuhr': {
-          'Mai': [true, true, true, false, false, false, false],
-          'Moses': [false, false, true, false, true, false, true]
-        }
-      }
-    };
-
-    function getFormattedDate(date) {
-      return `${date.getDate()} ${date.toLocaleString('default', { month: 'short' })}`;
-    }
+    const savedData = {}; // Example: Fill this dynamically or manually as needed
 
     const monthButtons = document.getElementById('month-buttons');
     const container = document.getElementById('months-container');
 
-    months.forEach((month, monthIndex) => {
+    const allWeeks = [];
+    let current = new Date(startDate);
+
+    while (current <= endDate) {
+      const week = [];
+      for (let i = 0; i < 7; i++) {
+        if (current > endDate) break;
+        week.push(new Date(current));
+        current.setDate(current.getDate() + 1);
+      }
+      allWeeks.push(week);
+    }
+
+    allWeeks.forEach((week, weekIndex) => {
       const section = document.createElement('div');
       section.className = 'month-section';
-      section.id = `month-${monthIndex}`;
+      section.id = `month-${weekIndex}`;
 
       const table = document.createElement('table');
       const thead = document.createElement('thead');
 
-      let startDate = new Date(monthStartDates[month]);
-      let dateHeaders = [];
-      for (let i = 0; i < 7; i++) {
-        const current = new Date(startDate);
-        current.setDate(startDate.getDate() + i);
-        dateHeaders.push(`${current.toLocaleDateString('en-GB', { weekday: 'short' })} (${getFormattedDate(current)})`);
-      }
+      const dateHeaders = week.map(date => `${date.toLocaleDateString('en-GB', { weekday: 'short' })} (${date.getDate()} ${date.toLocaleString('default', { month: 'short' })})`);
 
       thead.innerHTML = `
         <tr>
@@ -163,14 +146,11 @@
           nameCell.className = 'name';
           row.appendChild(nameCell);
 
-          for (let i = 0; i < 7; i++) {
+          for (let i = 0; i < week.length; i++) {
             const cell = document.createElement('td');
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
-
-            const isChecked = savedData[month]?.[prayer]?.[user]?.[i];
-            checkbox.checked = isChecked === true;
-
+            checkbox.checked = false; // Pre-filled state optional
             cell.appendChild(checkbox);
             row.appendChild(cell);
           }
@@ -184,7 +164,7 @@
       container.appendChild(section);
 
       const button = document.createElement('button');
-      button.textContent = month;
+      button.textContent = `Week ${weekIndex + 1}`;
       button.addEventListener('click', () => {
         document.querySelectorAll('.month-section').forEach(s => s.classList.remove('active'));
         section.classList.add('active');
