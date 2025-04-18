@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Prayer Tracker – Mai & Moses</title>
   <style>
     body {
@@ -11,21 +11,17 @@
       padding: 20px;
       animation: fadeInBody 1s ease;
     }
-
     @keyframes fadeInBody {
       from { opacity: 0; transform: translateY(-10px); }
       to { opacity: 1; transform: translateY(0); }
     }
-
     h1 {
       margin-bottom: 20px;
       color: #2e7d32;
     }
-
     .month-buttons {
       margin-bottom: 20px;
     }
-
     .month-buttons button {
       padding: 10px 16px;
       margin: 5px;
@@ -37,25 +33,20 @@
       font-weight: bold;
       transition: background-color 0.3s;
     }
-
     .month-buttons button:hover {
       background-color: #388e3c;
     }
-
     .month-section {
       display: none;
       animation: fadeInMonth 0.8s ease-in-out;
     }
-
     .month-section.active {
       display: block;
     }
-
     @keyframes fadeInMonth {
       from { opacity: 0; transform: scale(0.97); }
       to { opacity: 1; transform: scale(1); }
     }
-
     table {
       width: 100%;
       max-width: 950px;
@@ -67,33 +58,27 @@
       overflow: hidden;
       margin-top: 10px;
     }
-
     th, td {
       border: 1px solid #ddd;
       padding: 10px;
     }
-
     th {
       background-color: #388e3c;
       color: white;
     }
-
     .name {
       font-weight: bold;
       background-color: #e8f5e9;
     }
-
     tr:hover {
       background-color: #f1f8e9;
       transition: background-color 0.3s;
     }
-
     td input[type="checkbox"] {
       transform: scale(1.2);
       cursor: pointer;
       transition: all 0.3s ease;
     }
-
     td input[type="checkbox"]:checked {
       transform: scale(1.4);
       box-shadow: 0 0 10px #81c784;
@@ -102,116 +87,112 @@
 </head>
 <body>
   <h1>Prayer Tracker – Mai & Moses</h1>
-
   <div class="month-buttons" id="month-buttons"></div>
   <div id="months-container"></div>
 
-  <!-- 🔗 Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js"></script>
+  <!-- ✅ Firebase SDK v8 (compatible with your JavaScript style) -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
   <script>
-    // 🚨 Replace with your actual Firebase project config below
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT.firebaseapp.com",
-      databaseURL: "https://YOUR_PROJECT.firebaseio.com",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_PROJECT.appspot.com",
-      messagingSenderId: "YOUR_SENDER_ID",
-      appId: "YOUR_APP_ID"
+      apiKey: "AIzaSyDjjOuH9bsQc1udElzJ0bsnvD5RkVvCIJ8",
+      authDomain: "realtime-database-959b3.firebaseapp.com",
+      databaseURL: "https://realtime-database-959b3-default-rtdb.firebaseio.com",
+      projectId: "realtime-database-959b3",
+      storageBucket: "realtime-database-959b3.firebasestorage.app",
+      messagingSenderId: "631814285470",
+      appId: "1:631814285470:web:bc7c8f0bfecc5984f2f38f"
     };
 
-    // 🔌 Initialize Firebase
     const app = firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const prayers = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
-    const users = ['Mai', 'Moses'];
-    const months = ['April', 'May', 'June', 'July', 'August', 'September', 'October'];
+    window.addEventListener('DOMContentLoaded', () => {
+      const prayers = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+      const users = ['Mai', 'Moses'];
+      const months = ['April', 'May', 'June', 'July', 'August', 'September', 'October'];
 
-    const monthButtons = document.getElementById('month-buttons');
-    const container = document.getElementById('months-container');
+      const monthButtons = document.getElementById('month-buttons');
+      const container = document.getElementById('months-container');
 
-    months.forEach((month, monthIndex) => {
-      const section = document.createElement('div');
-      section.className = 'month-section';
-      section.id = `month-${monthIndex}`;
+      months.forEach((month, monthIndex) => {
+        const section = document.createElement('div');
+        section.className = 'month-section';
+        section.id = `month-${monthIndex}`;
 
-      const table = document.createElement('table');
-      const thead = document.createElement('thead');
-      thead.innerHTML = `
-        <tr>
-          <th>Prayer</th>
-          <th>Name</th>
-          <th>Mon</th>
-          <th>Tue</th>
-          <th>Wed</th>
-          <th>Thu</th>
-          <th>Fri</th>
-          <th>Sat</th>
-          <th>Sun</th>
-        </tr>`;
-      table.appendChild(thead);
+        const table = document.createElement('table');
+        const thead = document.createElement('thead');
+        thead.innerHTML = `
+          <tr>
+            <th>Prayer</th>
+            <th>Name</th>
+            <th>Mon</th>
+            <th>Tue</th>
+            <th>Wed</th>
+            <th>Thu</th>
+            <th>Fri</th>
+            <th>Sat</th>
+            <th>Sun</th>
+          </tr>`;
+        table.appendChild(thead);
 
-      const tbody = document.createElement('tbody');
+        const tbody = document.createElement('tbody');
 
-      prayers.forEach(prayer => {
-        users.forEach(user => {
-          const row = document.createElement('tr');
+        prayers.forEach(prayer => {
+          users.forEach(user => {
+            const row = document.createElement('tr');
 
-          if (user === 'Mai') {
-            const prayerCell = document.createElement('td');
-            prayerCell.textContent = prayer;
-            prayerCell.rowSpan = 2;
-            row.appendChild(prayerCell);
-          }
+            if (user === 'Mai') {
+              const prayerCell = document.createElement('td');
+              prayerCell.textContent = prayer;
+              prayerCell.rowSpan = 2;
+              row.appendChild(prayerCell);
+            }
 
-          const nameCell = document.createElement('td');
-          nameCell.textContent = user;
-          nameCell.className = 'name';
-          row.appendChild(nameCell);
+            const nameCell = document.createElement('td');
+            nameCell.textContent = user;
+            nameCell.className = 'name';
+            row.appendChild(nameCell);
 
-          for (let i = 0; i < 7; i++) {
-            const cell = document.createElement('td');
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            const id = `${month}/${prayer}/${user}/day${i}`;
+            for (let i = 0; i < 7; i++) {
+              const cell = document.createElement('td');
+              const checkbox = document.createElement('input');
+              checkbox.type = 'checkbox';
+              const id = `${month}/${prayer}/${user}/day${i}`;
 
-            // Load saved checkbox value from Firebase
-            db.ref(id).once('value').then(snapshot => {
-              checkbox.checked = snapshot.val() === true;
-            });
+              db.ref(id).once('value').then(snapshot => {
+                checkbox.checked = snapshot.val() === true;
+              });
 
-            // Save checkbox change to Firebase
-            checkbox.addEventListener('change', () => {
-              db.ref(id).set(checkbox.checked);
-            });
+              checkbox.addEventListener('change', () => {
+                db.ref(id).set(checkbox.checked);
+              });
 
-            cell.appendChild(checkbox);
-            row.appendChild(cell);
-          }
+              cell.appendChild(checkbox);
+              row.appendChild(cell);
+            }
 
-          tbody.appendChild(row);
+            tbody.appendChild(row);
+          });
         });
+
+        table.appendChild(tbody);
+        section.appendChild(table);
+        container.appendChild(section);
+
+        const button = document.createElement('button');
+        button.textContent = month;
+        button.addEventListener('click', () => {
+          document.querySelectorAll('.month-section').forEach(s => s.classList.remove('active'));
+          section.classList.add('active');
+        });
+
+        monthButtons.appendChild(button);
       });
 
-      table.appendChild(tbody);
-      section.appendChild(table);
-      container.appendChild(section);
-
-      const button = document.createElement('button');
-      button.textContent = month;
-      button.addEventListener('click', () => {
-        document.querySelectorAll('.month-section').forEach(s => s.classList.remove('active'));
-        section.classList.add('active');
-      });
-
-      monthButtons.appendChild(button);
+      document.getElementById('month-0').classList.add('active');
     });
-
-    // Show first month by default
-    document.getElementById('month-0').classList.add('active');
   </script>
 </body>
 </html>
-
