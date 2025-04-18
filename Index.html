@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <title>Prayer Tracker – Mai & Moses</title>
+  <!-- Firebase SDK v8 -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -10,12 +13,10 @@
       text-align: center;
       padding: 20px;
     }
-
     h1 {
       margin-bottom: 20px;
       color: #2e7d32;
     }
-
     .month-buttons button {
       padding: 10px 16px;
       margin: 5px;
@@ -25,19 +26,11 @@
       border-radius: 6px;
       cursor: pointer;
     }
-
     .month-buttons button:hover {
       background-color: #388e3c;
     }
-
-    .month-section {
-      display: none;
-    }
-
-    .month-section.active {
-      display: block;
-    }
-
+    .month-section { display: none; }
+    .month-section.active { display: block; }
     table {
       width: 100%;
       max-width: 950px;
@@ -48,31 +41,25 @@
       border-radius: 8px;
       margin-top: 10px;
     }
-
     th, td {
       border: 1px solid #ddd;
       padding: 10px;
     }
-
     th {
       background-color: #388e3c;
       color: white;
     }
-
     .name {
       font-weight: bold;
       background-color: #e8f5e9;
     }
-
     tr:hover {
       background-color: #f1f8e9;
     }
-
     td input[type="checkbox"] {
       transform: scale(1.2);
       cursor: pointer;
     }
-
     td input[type="checkbox"]:checked {
       transform: scale(1.4);
       box-shadow: 0 0 10px #81c784;
@@ -81,20 +68,30 @@
 </head>
 <body>
   <h1>Prayer Tracker – Mai & Moses</h1>
-
   <div class="month-buttons" id="month-buttons"></div>
   <div id="months-container"></div>
 
   <script>
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyD89bzLpDJ90uLsZGzZaIb2dz2WG14NXQg",
+      authDomain: "prayer-tracker-95460.firebaseapp.com",
+      databaseURL: "https://prayer-tracker-95460-default-rtdb.firebaseio.com",
+      projectId: "prayer-tracker-95460",
+      storageBucket: "prayer-tracker-95460.appspot.com",
+      messagingSenderId: "865126411201",
+      appId: "1:865126411201:web:3e2de2f7638e5461b49d40"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
     const prayers = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
     const users = ['Mai', 'Moses'];
-
-    const startDate = new Date(2024, 3, 15); // April 15, 2024
-    const endDate = new Date(2024, 8, 15); // September 15, 2024
+    const startDate = new Date(2024, 3, 15);
+    const endDate = new Date(2024, 8, 15);
 
     const monthButtons = document.getElementById('month-buttons');
     const container = document.getElementById('months-container');
-
     const allWeeks = [];
     let current = new Date(startDate);
 
@@ -115,19 +112,12 @@
 
       const table = document.createElement('table');
       const thead = document.createElement('thead');
-
       const dateHeaders = week.map(date => `${date.toLocaleDateString('en-GB', { weekday: 'short' })} (${date.getDate()} ${date.toLocaleString('default', { month: 'short' })})`);
 
-      thead.innerHTML = `
-        <tr>
-          <th>Prayer</th>
-          <th>Name</th>
-          ${dateHeaders.map(d => `<th>${d}</th>`).join('')}
-        </tr>`;
-
+      thead.innerHTML = `<tr><th>Prayer</th><th>Name</th>${dateHeaders.map(d => `<th>${d}</th>`).join('')}</tr>`;
       table.appendChild(thead);
-      const tbody = document.createElement('tbody');
 
+      const tbody = document.createElement('tbody');
       prayers.forEach(prayer => {
         users.forEach(user => {
           const row = document.createElement('tr');
@@ -148,12 +138,15 @@
             const cell = document.createElement('td');
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
+            const dateKey = week[i].toISOString().split('T')[0];
+            const id = `${dateKey}_${prayer}_${user}`;
 
-            const id = `${week[i].toISOString().split('T')[0]}_${prayer}_${user}`;
-            checkbox.checked = localStorage.getItem(id) === 'true';
+            db.ref('tracker/' + id).once('value').then(snapshot => {
+              checkbox.checked = snapshot.val() === true;
+            });
 
             checkbox.addEventListener('change', () => {
-              localStorage.setItem(id, checkbox.checked);
+              db.ref('tracker/' + id).set(checkbox.checked);
             });
 
             cell.appendChild(checkbox);
