@@ -56,13 +56,13 @@
     tr:hover {
       background-color: #f1f8e9;
     }
-    td input[type="checkbox"] {
-      transform: scale(1.2);
+    .icon-button {
+      font-size: 20px;
       cursor: pointer;
+      transition: transform 0.2s ease;
     }
-    td input[type="checkbox"]:checked {
-      transform: scale(1.4);
-      box-shadow: 0 0 10px #81c784;
+    .icon-button:hover {
+      transform: scale(1.2);
     }
   </style>
 </head>
@@ -136,20 +136,24 @@
 
           for (let i = 0; i < week.length; i++) {
             const cell = document.createElement('td');
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
             const dateKey = week[i].toISOString().split('T')[0];
             const id = `${dateKey}_${prayer}_${user}`;
+            const icon = document.createElement('span');
+            icon.className = 'icon-button';
+            icon.textContent = '😔';
 
             db.ref('tracker/' + id).once('value').then(snapshot => {
-              checkbox.checked = snapshot.val() === true;
+              const value = snapshot.val();
+              icon.textContent = value === true ? '❤️' : '😔';
             });
 
-            checkbox.addEventListener('change', () => {
-              db.ref('tracker/' + id).set(checkbox.checked);
+            icon.addEventListener('click', () => {
+              const newValue = icon.textContent === '❤️' ? false : true;
+              db.ref('tracker/' + id).set(newValue);
+              icon.textContent = newValue ? '❤️' : '😔';
             });
 
-            cell.appendChild(checkbox);
+            cell.appendChild(icon);
             row.appendChild(cell);
           }
 
