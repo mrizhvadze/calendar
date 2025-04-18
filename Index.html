@@ -139,8 +139,25 @@
     }
 
     const updateSummary = () => {
-      summary.textContent = `Mai: ${counts['Mai']} prayers ❤️ | Moses: ${counts['Moses']} prayers ❤️`;
-    };
+  summary.textContent = `Mai: ${counts['Mai']} prayers ❤️ | Moses: ${counts['Moses']} prayers ❤️`;
+
+  const todayDate = new Date().toISOString().split('T')[0];
+  let dailyCompleted = 0;
+
+  prayers.forEach(prayer => {
+    users.forEach(user => {
+      const id = `${todayDate}_${prayer}_${user}`;
+      db.ref('tracker/' + id).once('value').then(snapshot => {
+        if (snapshot.val() === true) {
+          dailyCompleted++;
+          if (dailyCompleted === prayers.length * users.length) {
+            alert("MashaAllah! You’ve both completed all 5 prayers today! 🌟");
+          }
+        }
+      });
+    });
+  });
+};
 
     allWeeks.forEach((week, weekIndex) => {
       const section = document.createElement('div');
@@ -184,7 +201,11 @@
               const value = snapshot.val();
               currentState = value === true;
               icon.textContent = currentState ? '❤️' : '😔';
-              if (currentState) counts[user]++;
+              icon.dataset.state = currentState ? 'true' : 'false';
+              if (currentState && icon.dataset.counted !== 'true') {
+                counts[user]++;
+                icon.dataset.counted = 'true';
+              }
               updateSummary();
             });
 
