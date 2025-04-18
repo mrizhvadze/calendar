@@ -18,14 +18,14 @@
       color: #2e7d32;
     }
     #daily-message {
-  font-style: italic;
-  font-size: 18px;
-  color: #2e7d32;
-  margin-bottom: 20px;
-  font-weight: bold;
-  text-decoration: underline;
-  animation: fadeInMotivate 1s ease-in-out;
-}
+      font-style: italic;
+      font-size: 18px;
+      color: #2e7d32;
+      margin-bottom: 20px;
+      font-weight: bold;
+      text-decoration: underline;
+      animation: fadeInMotivate 1s ease-in-out;
+    }
     .month-buttons button {
       padding: 10px 16px;
       margin: 5px;
@@ -77,11 +77,19 @@
       margin-top: 30px;
       font-size: 18px;
     }
-  @keyframes fadeInMotivate {
-  0% { opacity: 0; transform: translateY(-10px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-</style>
+    .name.mai {
+      color: #e94e77;
+    }
+    .name.moses {
+      color: #4a90e2;
+    }
+    .prayer-row-separator {
+      height: 1px;
+      background-color: #ccc;
+      margin: 5px 0;
+      width: 100%;
+    }
+  </style>
 </head>
 <body>
   <h1>Prayer Tracker – Mai & Moses</h1>
@@ -116,33 +124,19 @@
     const counts = { 'Mai': 0, 'Moses': 0 };
 
     const dailyMessages = [
-  "\"Indeed, prayer prohibits immorality and wrongdoing.\" – Qur'an 29:45",
-  "\"Verily, in the remembrance of Allah do hearts find rest.\" – Qur'an 13:28",
-  "\"Establish prayer to remember Me.\" – Qur'an 20:14",
-  "\"Successful indeed are the believers who are humble in their prayers.\" – Qur'an 23:1-2",
-  "May your heart find peace in every prayer today.",
-  "Even one step forward counts. Allah sees your effort.",
-  "Together in prayer, together in love.",
-  "Your prayers are a light in your day.",
-  "Small consistent acts are beloved to Allah.",
-  "You are never alone on this path.",
-  "Allah loves those who strive.",
-  "Consistency in prayer is a gift you give to your soul.",
-  "One prayer at a time, you're building strength.",
-  "Allah listens, even when your heart whispers."
-];
+      "\"Indeed, prayer prohibits immorality and wrongdoing.\" – Qur'an 29:45",
+      "\"Verily, in the remembrance of Allah do hearts find rest.\" – Qur'an 13:28",
+      "\"Establish prayer to remember Me.\" – Qur'an 20:14",
+      "\"Successful indeed are the believers who are humble in their prayers.\" – Qur'an 23:1-2"
+    ];
 
-    const today = new Date();
-    const index = Math.floor(Math.random() * dailyMessages.length);
-    messageBox.textContent = dailyMessages[index];
+    messageBox.textContent = dailyMessages[Math.floor(Math.random() * dailyMessages.length)];
 
     const allWeeks = [];
     let current = new Date(startDate);
-
     while (current <= endDate) {
       const week = [];
-      for (let i = 0; i < 7; i++) {
-        if (current > endDate) break;
+      for (let i = 0; i < 7 && current <= endDate; i++) {
         week.push(new Date(current));
         current.setDate(current.getDate() + 1);
       }
@@ -150,8 +144,8 @@
     }
 
     const updateSummary = () => {
-  summary.textContent = `👑 Mai: ${counts['Mai']} | 👑 Moses: ${counts['Moses']}`;
-};
+      summary.textContent = `👑 Mai: ${counts['Mai']} | 👑 Moses: ${counts['Moses']}`;
+    };
 
     allWeeks.forEach((week, weekIndex) => {
       const section = document.createElement('div');
@@ -166,63 +160,72 @@
 
       const tbody = document.createElement('tbody');
       prayers.forEach(prayer => {
-        users.forEach(user => {
+        users.forEach((user, idx) => {
           const row = document.createElement('tr');
 
-          if (user === 'Mai') {
-  const prayerCell = document.createElement('td');
-  prayerCell.textContent = prayer;
-  prayerCell.rowSpan = 2;
-  row.appendChild(prayerCell);
-}
+          if (idx === 0) {
+            const prayerCell = document.createElement('td');
+            prayerCell.textContent = prayer;
+            prayerCell.rowSpan = users.length;
+            row.appendChild(prayerCell);
+          }
 
           const nameCell = document.createElement('td');
           const icons = { 'Mai': '👑', 'Moses': '👑' };
-          nameCell.innerHTML = icons[user] ? `<div style='display: flex; align-items: center;'>${icons[user]}&nbsp;<span>${user}</span></div>` : user;
-          nameCell.className = 'name';
+          nameCell.innerHTML = `<div style='display: flex; align-items: center;'>${icons[user]}&nbsp;<span>${user}</span></div>`;
+          nameCell.className = 'name ' + user.toLowerCase();
           row.appendChild(nameCell);
 
-          for (let i = 0; i < week.length; i++) {
+          week.forEach(day => {
             const cell = document.createElement('td');
-            const dateKey = week[i].toISOString().split('T')[0];
+            const dateKey = day.toISOString().split('T')[0];
             const id = `${dateKey}_${prayer}_${user}`;
             const icon = document.createElement('span');
             icon.className = 'icon-button';
             icon.textContent = '😔';
 
-            let currentState = false;
-
             db.ref('tracker/' + id).once('value').then(snapshot => {
-  const value = snapshot.val();
-  currentState = value === true;
-  icon.textContent = currentState ? '❤️' : '😔';
-  icon.dataset.state = currentState ? 'true' : 'false';
-
-  // no counter update on load
-});
+              const value = snapshot.val();
+              const state = value === true;
+              icon.textContent = state ? '❤️' : '😔';
+              icon.dataset.state = state ? 'true' : 'false';
+              if (state && icon.dataset.counted !== 'true') {
+                icon.dataset.counted = 'true';
+                counts[user]++;
+                updateSummary();
+              }
+            });
 
             icon.addEventListener('click', () => {
-              const newValue = !currentState;
+              const newValue = icon.dataset.state !== 'true';
               db.ref('tracker/' + id).set(newValue);
               icon.textContent = newValue ? '❤️' : '😔';
-              if (newValue !== currentState) {
-  if (newValue) {
-    counts[user]++;
-    icon.dataset.state = 'true';
-  } else {
-    counts[user]--;
-    icon.dataset.state = 'false';
-  }
-  currentState = newValue;
-  updateSummary();
-}
+              icon.dataset.state = newValue ? 'true' : 'false';
+
+              if (newValue && icon.dataset.counted !== 'true') {
+                counts[user]++;
+                icon.dataset.counted = 'true';
+              } else if (!newValue && icon.dataset.counted === 'true') {
+                counts[user]--;
+                icon.dataset.counted = 'false';
+              }
+              updateSummary();
             });
 
             cell.appendChild(icon);
             row.appendChild(cell);
-          }
+          });
 
           tbody.appendChild(row);
+
+          if (user === 'Moses') {
+            const separator = document.createElement('tr');
+            const sepTd = document.createElement('td');
+            sepTd.colSpan = week.length + 2;
+            sepTd.innerHTML = "<div class='prayer-row-separator'></div>";
+            separator.appendChild(sepTd);
+            tbody.appendChild(separator);
+          }
         });
       });
 
